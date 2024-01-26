@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.falcon.openinapp_assignment"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -79,12 +79,6 @@ dependencies {
     implementation ("com.tom-roush:pdfbox-android:2.0.27.0")
     implementation ("com.google.android.gms:play-services-mlkit-text-recognition-common:19.0.0")
 
-    val billingVersion = "6.0.1"
-
-    implementation ("com.android.billingclient:billing:$billingVersion")
-    implementation ("com.android.billingclient:billing-ktx:$billingVersion")
-
-
 
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
@@ -116,12 +110,17 @@ dependencies {
 
     implementation("com.google.dagger:hilt-android:2.44")
     kapt("com.google.dagger:hilt-android-compiler:2.44")
-//    implementation ("com.itextpdf:itext7-core:8.0.2")
-//    implementation ("com.itextpdf.android:kernel-android:8.0.1")
     implementation ("com.itextpdf:itextg:5.5.10") // Use the version appropriate for your project
     implementation ("com.madgag.spongycastle:prov:1.56.0.0") // Use the version appropriate for your project
     implementation("androidx.core:core-splashscreen:1.0.1")
-
+// Charts
+//    implementation ("com.diogobernardino:williamchart:3.10.1")
+//
+//// Tooltips
+//    implementation ("com.diogobernardino.williamchart:tooltip-slider:3.10.1")
+//    implementation ("com.diogobernardino.williamchart:tooltip-points:3.10.1")
+//    implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation ("co.yml:ycharts:2.1.0")
 }
 
 kapt {

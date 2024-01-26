@@ -4,12 +4,15 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,11 +20,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
@@ -29,27 +38,50 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.falcon.openinapp_assignment.ui.theme.OpenInAppAssignmentTheme
 import kotlinx.coroutines.launch
+import org.bouncycastle.math.raw.Mod
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import co.yml.charts.axis.AxisData
+import co.yml.charts.common.model.Point
+import co.yml.charts.ui.linechart.LineChart
+import co.yml.charts.ui.linechart.model.GridLines
+import co.yml.charts.ui.linechart.model.IntersectionPoint
+import co.yml.charts.ui.linechart.model.Line
+import co.yml.charts.ui.linechart.model.LineChartData
+import co.yml.charts.ui.linechart.model.LinePlotData
+import co.yml.charts.ui.linechart.model.LineStyle
+import co.yml.charts.ui.linechart.model.SelectionHighlightPoint
+import co.yml.charts.ui.linechart.model.SelectionHighlightPopUp
+import co.yml.charts.ui.linechart.model.ShadowUnderLine
+import kotlinx.coroutines.CoroutineScope
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.runtime.getValue
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            OpenInAppAssignmentTheme {
-                // A surface container using the 'background' color from the theme
-
-            }
+            MainScreen()
         }
     }
 }
@@ -62,82 +94,346 @@ fun MainScreen() {
     val scope = rememberCoroutineScope()
     val list = listOf("Links", "Courses", "Plus", "Campaigns", "Profile")
     val pageState = rememberPagerState(0)
+    val currentType = remember {
+        mutableStateOf("Type")
+    }
     Column(
-        horizontalAlignment = Alignment.Start,
         modifier = Modifier
-//            .verticalScroll(rememberScrollState())
+            .background(colorResource(id = R.color.icon_blue))
     ) {
-        HorizontalPager(
-            pageCount = list.size,
-            state = pageState,
+        DashboardHeading()
+        Column(
+            horizontalAlignment = Alignment.Start,
             modifier = Modifier
-                .fillMaxSize()
-                .weight(1f)
-//                .padding(16.dp)
-                .padding(bottom = 8.dp),
-            pageContent = { pageNumber ->
-//                val specificContent = content.filter {
-//                    it.contentType == list[pageNumber]
-//                }
-//                LaunchedEffect(key1 = pageNumber) {
-//                    currentType.value = list[pageNumber]
-//                    Log.i("catcatcatwty2", pageNumber.toString())
-//                }
-//                NotesList(specificContent, navController, getIcon(list[pageNumber], true), modalSheetState)
-            }
-        )
-
-        TabRow(
-            selectedTabIndex = pageState.currentPage,
-            indicator = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(color = Color.White)
+//            .verticalScroll(rememberScrollState())
         ) {
-            list.forEachIndexed { index, _ ->
-                Tab(
-                    modifier = Modifier.fillMaxWidth(),
-                    selectedContentColor = colorResource(R.color.icon_blue),
-                    text = {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        ) {
-                            if (getIcon(list[index], false) != R.drawable.plus ) {
-                                Image(
-                                    painter = painterResource(id = getIcon(list[index], pageState.currentPage == index)),
-                                    contentDescription = "Icon",
-                                    modifier = Modifier
-                                        .size(25.dp)
-                                )
-                            }
-                            else{
+            HorizontalPager(
+                pageCount = list.size,
+                state = pageState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+                ,
+                pageContent = { pageNumber ->
+                LaunchedEffect(key1 = pageNumber) {
+                    currentType.value = list[pageNumber]
+                    Log.i("catcatcatwty2", pageNumber.toString())
+                }
+                    if (pageNumber == 0) {
+                        MainScreenContent()
+                    }
+                    else {
+                        ComingSoonScreen()
+                    }
+                }
+            )
 
-                                Box(
+            BottomNavigation(pageState, list, scope)
+        }
+    }
+
+}
+
+@Composable
+fun ComingSoonScreen() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+
+    ) {
+        LottieAnimation(animationID = R.raw.coming_soon_cat)
+        androidx.compose.material3.Text(
+            text = "Coming Soon"
+        )
+    }
+}
+
+@Composable
+fun LottieAnimation(animationID: Int) {
+    val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(animationID))
+    com.airbnb.lottie.compose.LottieAnimation(
+        composition = composition,
+        iterations = LottieConstants.IterateForever,
+        modifier = Modifier
+            .size(400.dp)
+    )
+}
+
+@Composable
+fun MainScreenContent() {
+    androidx.compose.material.Card(
+        modifier = Modifier
+            .shadow(elevation = 3.dp, shape = RoundedCornerShape(16.dp, 16.dp))
+            .fillMaxSize(),
+        backgroundColor = colorResource(id = R.color.light_grey)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp, 32.dp)
+        ) {
+            Text(
+                text = "Good Morning",
+                fontSize = 16.sp,
+                color = colorResource(id = R.color.grey),
+                fontFamily = FontFamily(Font(R.font.nunito_light_1)),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold
+                )
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Ajay Manva",
+                        fontSize = 24.sp,
+                        fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    )
+                    Spacer(modifier = Modifier.width(7.dp))
+                    Image(
+                        painter = painterResource(R.drawable.hello),
+                        contentDescription = "Icon",
+                        modifier = Modifier
+                            .size(35.dp)
+                    )
+                }
+                TimePeriod()
+            }
+            Chart()
+            Spacer(modifier = Modifier.height(10.dp))
+            LazyRow(
+                contentPadding = PaddingValues(0.dp),
+                modifier = Modifier,
+                horizontalArrangement = Arrangement.SpaceAround
+            ) {
+                val list = listOf(
+                    PickCardItem(R.drawable.avatar, "123", "Today’s clicks"),
+                    PickCardItem(R.drawable.avatar__1_, "Ahamedabad", "Top Location"),
+                    PickCardItem(R.drawable.avatar__2_, "Instagram", "Top Source")
+                )
+                items(list){ it ->
+                    PickCard(it.image, it.title, it.description)
+                }
+            }
+
+        }
+
+    }
+
+}
+
+//@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun PickCard(
+    image: Int, title: String, description: String
+) {
+    androidx.compose.material.Card(
+        shape = RoundedCornerShape(20.dp),
+        modifier = Modifier
+            .padding(8.dp),
+        backgroundColor = Color.White
+    ) {
+        Column(
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.Start,
+            modifier = Modifier
+                .padding(16.dp)
+        ) {
+            Image(
+                painter = painterResource(image),
+                contentDescription = "Icon",
+                modifier = Modifier
+                    .size(35.dp)
+            )
+            Column(
+                horizontalAlignment = Alignment.Start,
+                modifier = Modifier
+                    .padding(0.dp, 16.dp, 0.dp, 0.dp)
+            ) {
+                Text(
+                    text = title,
+                    fontSize = 16.sp,
+                    fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.SemiBold
+                    )
+                )
+                Text(
+                    text = description,
+                    fontSize = 16.sp,
+                    color = colorResource(id = R.color.grey),
+                    fontFamily = FontFamily(Font(R.font.nunito_light_1)),
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.SemiBold
+                    )
+                )
+            }
+
+        }
+    }
+}
+
+@Composable
+private fun Chart() {
+    val steps = 5
+    val pointsData: List<Point> =
+        listOf(Point(0f, 40f), Point(1f, 90f), Point(2f, 0f), Point(3f, 60f), Point(4f, 10f))
+    val xAxisData = AxisData.Builder()
+        .axisStepSize(100.dp)
+        .backgroundColor(Color.White)
+        .steps(pointsData.size - 1)
+        .labelData { i -> i.toString() }
+        .labelAndAxisLinePadding(15.dp)
+        .axisLineColor(colorResource(id = R.color.black))
+        .axisLabelColor(colorResource(id = R.color.black))
+        .build()
+
+    val yAxisData = AxisData.Builder()
+        .steps(steps)
+        .backgroundColor(Color.White)
+        .labelAndAxisLinePadding(5.dp)
+        .labelData { i ->
+            val yScale = 100 / steps
+            (i * yScale).toString()
+        }
+        .axisLineColor(colorResource(id = R.color.black))
+        .axisLabelColor(colorResource(id = R.color.black))
+        .build()
+
+    val lineChartData = LineChartData(
+        linePlotData = LinePlotData(
+            lines = listOf(
+                Line(
+                    dataPoints = pointsData,
+                    LineStyle(),
+                    IntersectionPoint(),
+                    SelectionHighlightPoint(),
+                    ShadowUnderLine(),
+                    SelectionHighlightPopUp()
+                )
+            ),
+        ),
+        xAxisData = xAxisData,
+        yAxisData = yAxisData,
+        gridLines = GridLines(),
+        backgroundColor = Color.White
+    )
+    LineChart(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(300.dp),
+        lineChartData = lineChartData
+    )
+}
+
+@Composable
+fun TimePeriod() {
+    androidx.compose.material.Card(
+        modifier = Modifier
+            .shadow(elevation = 0.dp, shape = RoundedCornerShape(8.dp))
+            .padding(8.dp),
+        backgroundColor = Color.White,
+        border = BorderStroke(1.dp, colorResource(id = R.color.icon_blue))
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.End,
+            modifier = Modifier
+                .padding(8.dp),
+        ) {
+            Text(
+                text = "22 Aug - 23 Sept",
+                fontSize = 12.sp,
+                fontFamily = FontFamily(Font(R.font.nunito_extralight)),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold
+                )
+            )
+        }
+
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun BottomNavigation(
+    pageState: PagerState,
+    list: List<String>,
+    scope: CoroutineScope
+) {
+    TabRow(
+        selectedTabIndex = pageState.currentPage,
+        indicator = {},
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = Color.White)
+    ) {
+        list.forEachIndexed { index, _ ->
+            Tab(
+                modifier = Modifier.fillMaxWidth(),
+                selectedContentColor = colorResource(R.color.icon_blue),
+                text = {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        if (getIcon(list[index], false) != R.drawable.plus) {
+                            Image(
+                                painter = painterResource(
+                                    id = getIcon(
+                                        list[index],
+                                        pageState.currentPage == index
+                                    )
+                                ),
+                                contentDescription = "Icon",
+                                modifier = Modifier
+                                    .size(25.dp)
+                            )
+                        } else {
+
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp) // Adjust the size of the circle as needed
+                                    .background(
+                                        colorResource(id = R.color.icon_blue),
+                                        shape = CircleShape
+                                    )
+                            ) {
+                                // Your content inside the circular shape
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center,
                                     modifier = Modifier
-                                        .size(40.dp) // Adjust the size of the circle as needed
-                                        .background(colorResource(id = R.color.icon_blue), shape = CircleShape)
+                                        .fillMaxSize()
                                 ) {
-                                    // Your content inside the circular shape
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.Center,
+                                    Image(
+                                        painter = painterResource(
+                                            id = getIcon(
+                                                list[index],
+                                                pageState.currentPage == index
+                                            )
+                                        ),
+                                        contentDescription = "Icon",
                                         modifier = Modifier
-                                            .fillMaxSize()
-                                    ) {
-                                        Image(
-                                            painter = painterResource(id = getIcon(list[index], pageState.currentPage == index)),
-                                            contentDescription = "Icon",
-                                            modifier = Modifier
-                                                .size(25.dp)
-                                        )
-                                    }
-
+                                            .size(25.dp)
+                                    )
                                 }
+
                             }
-                            Spacer(modifier = Modifier.height(5.dp))
+                        }
+                        Spacer(modifier = Modifier.height(5.dp))
+                        if (getIcon(list[index], false) != R.drawable.plus) {
                             androidx.compose.material.Text(
                                 list[index],
                                 fontSize = 11.sp,
@@ -148,29 +444,57 @@ fun MainScreen() {
                                 overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.padding(bottom = 10.dp)
                             )
-
-                            if (pageState.currentPage == index) {
-
-                            }
                         }
 
-                    },
-                    // on below line we are specifying
-                    // the tab which is selected.
-                    selected = pageState.currentPage == index,
-                    // on below line we are specifying the
-                    // on click for the tab which is selected.
-                    onClick = {
-                        // on below line we are specifying the scope.
-                        Log.i("happppy", pageState.currentPage.toString())
-                        Log.i("happppy2", index.toString())
-                        scope.launch {
-                            pageState.scrollToPage(index)
+
+                        if (pageState.currentPage == index) {
+
                         }
                     }
-                )
-            }
+
+                },
+                // on below line we are specifying
+                // the tab which is selected.
+                selected = pageState.currentPage == index,
+                // on below line we are specifying the
+                // on click for the tab which is selected.
+                onClick = {
+                    // on below line we are specifying the scope.
+                    Log.i("happppy", pageState.currentPage.toString())
+                    Log.i("happppy2", index.toString())
+                    scope.launch {
+                        pageState.scrollToPage(index)
+                    }
+                }
+            )
         }
+    }
+}
+
+@Composable
+private fun DashboardHeading() {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "Dashboard",
+            fontSize = 24.sp,
+            color = Color.White,
+            fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = FontWeight.SemiBold
+            )
+        )
+        Image(
+            painter = painterResource(id = R.drawable.frame_7),
+            contentDescription = "menu icon",
+            modifier = Modifier
+                .size(40.dp)
+        )
     }
 }
 
