@@ -1,5 +1,10 @@
 package com.falcon.openinapp_assignment
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -73,6 +78,8 @@ import kotlinx.coroutines.CoroutineScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat.startActivity
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
@@ -171,7 +178,9 @@ fun MainScreenContent() {
         backgroundColor = colorResource(id = R.color.light_grey)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp, 32.dp)
+            modifier = Modifier
+                .padding(16.dp, 32.dp)
+                .verticalScroll(rememberScrollState())
         ) {
             Text(
                 text = "Good Morning",
@@ -224,11 +233,320 @@ fun MainScreenContent() {
                     PickCard(it.image, it.title, it.description)
                 }
             }
-
+            ViewAnalyticsCard()
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Row {
+                    TopLinksCard()
+                    RecentLinksCard()
+                }
+                Image(
+                    painter = painterResource(R.drawable.input_container),
+                    contentDescription = "Icon",
+                    modifier = Modifier
+                        .size(35.dp)
+                )
+            }
+            LinkCard()
+            LinkCard()
+            LinkCard()
+            LinkCard()
+            ViewAllLinksCard()
+            WhatsappCard()
+            Spacer(modifier = Modifier.height(60.dp))
         }
 
     }
 
+}
+
+@Composable
+fun WhatsappCard() {
+    val context = LocalContext.current
+    androidx.compose.material.Card(
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier
+            .shadow(elevation = 0.dp, shape = RoundedCornerShape(8.dp))
+            .padding(8.dp)
+            .fillMaxWidth()
+            .clickable {
+                openWhatsAppChat(context, "+918800136151")
+            },
+        backgroundColor = colorResource(id = R.color.background_green),
+        border = BorderStroke(1.dp, colorResource(id = R.color.background_green))
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start,
+            modifier = Modifier
+                .padding(16.dp),
+        ) {
+            Image(
+                painter = painterResource(R.drawable.vector),
+                contentDescription = "Icon",
+                modifier = Modifier
+                    .size(35.dp)
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                text = "Talk with us",
+                fontSize = 12.sp,
+                fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold
+                )
+            )
+        }
+    }
+}
+
+@Composable
+private fun RecentLinksCard() {
+    androidx.compose.material.Card(
+        shape = RoundedCornerShape(32.dp),
+        modifier = Modifier
+            .shadow(elevation = 0.dp, shape = RoundedCornerShape(8.dp))
+            .padding(8.dp),
+        backgroundColor = colorResource(id = R.color.white),
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(8.dp),
+        ) {
+            Text(
+                text = "Recent Links",
+                fontSize = 12.sp,
+                color = colorResource(id = R.color.dark_grey),
+                fontFamily = FontFamily(Font(R.font.nunito_extralight)),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold
+                )
+            )
+        }
+    }
+}
+
+@Composable
+private fun TopLinksCard() {
+    androidx.compose.material.Card(
+        shape = RoundedCornerShape(32.dp),
+        modifier = Modifier
+            .shadow(elevation = 0.dp, shape = RoundedCornerShape(8.dp))
+            .padding(8.dp),
+        backgroundColor = colorResource(id = R.color.icon_blue),
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(8.dp),
+        ) {
+            Text(
+                text = "Top Links",
+                fontSize = 12.sp,
+                color = Color.White,
+                fontFamily = FontFamily(Font(R.font.nunito_extralight)),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold
+                )
+            )
+        }
+    }
+}
+
+
+@Composable
+private fun ViewAllLinksCard() {
+    androidx.compose.material.Card(
+        modifier = Modifier
+            .shadow(elevation = 0.dp, shape = RoundedCornerShape(8.dp))
+            .padding(8.dp)
+            .fillMaxWidth(),
+        backgroundColor = Color.White,
+        border = BorderStroke(1.dp, colorResource(id = R.color.dark_grey))
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .padding(8.dp),
+        ) {
+            Image(
+                painter = painterResource(R.drawable.link),
+                contentDescription = "Icon",
+                modifier = Modifier
+                    .size(35.dp)
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                text = "View all Links",
+                fontSize = 12.sp,
+                fontFamily = FontFamily(Font(R.font.nunito_extralight)),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold
+                )
+            )
+        }
+    }
+}
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun LinkCard() {
+    androidx.compose.material.Card(
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier
+            .shadow(elevation = 0.dp, shape = RoundedCornerShape(16.dp))
+            .padding(8.dp)
+            .fillMaxWidth(),
+        backgroundColor = Color.White,
+    ) {
+        Column(
+            verticalArrangement = Arrangement.Center
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth()
+            ) {
+                ImageNameDate()
+                ClicksColumn()
+            }
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth()
+            ) {
+                val clipboardManager = LocalContext.current.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val link = remember {
+                    mutableStateOf("https://www.instagram.com/")
+                }
+                Text(
+                    text = link.value,
+                    fontSize = 14.sp,
+                    color = colorResource(id = R.color.icon_blue),
+                    fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.SemiBold
+                    )
+                )
+                Image(
+                    painter = painterResource(R.drawable.copy),
+                    contentDescription = "Icon",
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable {
+                            clipboardManager.setPrimaryClip(
+                                ClipData.newPlainText(
+                                    "Copied Code",
+                                    link.value
+                                )
+                            )
+                        }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ClicksColumn() {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.End
+    ) {
+        Text(
+            text = "2323",
+            fontSize = 14.sp,
+            fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = FontWeight.SemiBold
+            )
+        )
+        Text(
+            text = "Clicks",
+            fontSize = 14.sp,
+            color = colorResource(id = R.color.dark_grey),
+            fontFamily = FontFamily(Font(R.font.nunito_light_1)),
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = FontWeight.SemiBold
+            )
+        )
+    }
+}
+
+@Composable
+private fun ImageNameDate() {
+    Row {
+        Image(
+            painter = painterResource(R.drawable.hello),
+            contentDescription = "Icon",
+            modifier = Modifier
+                .size(35.dp)
+        )
+        Spacer(modifier = Modifier.width(10.dp))
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.Start
+        ) {
+            Text(
+                text = "Sample link name...",
+                fontSize = 14.sp,
+                fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold
+                )
+            )
+            Text(
+                text = "22 Aug 2022",
+                fontSize = 14.sp,
+                color = colorResource(id = R.color.dark_grey),
+                fontFamily = FontFamily(Font(R.font.nunito_light_1)),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold
+                )
+            )
+        }
+    }
+}
+
+@Composable
+private fun ViewAnalyticsCard() {
+    androidx.compose.material.Card(
+        modifier = Modifier
+            .shadow(elevation = 0.dp, shape = RoundedCornerShape(8.dp))
+            .padding(8.dp)
+            .fillMaxWidth(),
+        backgroundColor = Color.White,
+        border = BorderStroke(1.dp, colorResource(id = R.color.dark_grey))
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .padding(8.dp),
+        ) {
+            Image(
+                painter = painterResource(R.drawable.price_boost),
+                contentDescription = "Icon",
+                modifier = Modifier
+                    .size(35.dp)
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                text = "View Analytics",
+                fontSize = 12.sp,
+                fontFamily = FontFamily(Font(R.font.nunito_extralight)),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold
+                )
+            )
+        }
+    }
 }
 
 //@Preview(showBackground = true, showSystemUi = true)
@@ -359,7 +677,6 @@ fun TimePeriod() {
                 )
             )
         }
-
     }
 }
 
@@ -538,5 +855,15 @@ fun getIcon(contentName: String, selected: Boolean): Int {
             }
             else -> return R.drawable.error
         }
+    }
+}
+fun openWhatsAppChat(context: Context, phoneNumber: String) {
+    try {
+        val uri = Uri.parse("whatsapp://send?phone=$phoneNumber")
+        val intent = Intent(Intent.ACTION_VIEW, uri)
+        context.startActivity(intent)
+    } catch (e: Exception) {
+        // Handle exceptions, e.g., if WhatsApp is not installed on the device
+        e.printStackTrace()
     }
 }
