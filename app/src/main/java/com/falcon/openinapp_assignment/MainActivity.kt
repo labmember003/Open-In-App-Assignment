@@ -6,9 +6,12 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.provider.ContactsContract.Data
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -80,9 +83,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat.startActivity
+import androidx.lifecycle.Observer
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.falcon.openinapp_assignment.api.DataViewModel
+import com.falcon.openinapp_assignment.api.NetworkResult
 import com.falcon.openinapp_assignment.utils.TokenManager
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -92,12 +98,34 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var tokenManager: TokenManager
+    private val dataViewModel by viewModels<DataViewModel>()
+
+    lateinit var data: com.falcon.openinapp_assignment.api.dataclasses.Data
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            tokenManager.saveToken("Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MjU5MjcsImlhdCI6MTY3NDU1MDQ1MH0.dCkW0ox8tbjJA2GgUx2UEwNlbTZ7Rr38PVFJevYcXFI")
+            tokenManager.saveToken()
+            bindObservers()
+            dataViewModel.getData()
             MainScreen()
         }
+    }
+
+    private fun bindObservers() {
+        dataViewModel.dataLiveData.observe(this, Observer {
+            when(it) {
+                is NetworkResult.Success -> {
+                    data = it.data!!
+//                    Toast.makeText(this, data.top_location, Toast.LENGTH_LONG).show()
+                }
+                is NetworkResult.Error -> {
+
+                }
+                is NetworkResult.Loading -> {
+
+                }
+            }
+        })
     }
 }
 
@@ -120,7 +148,6 @@ fun MainScreen() {
         Column(
             horizontalAlignment = Alignment.Start,
             modifier = Modifier
-//            .verticalScroll(rememberScrollState())
         ) {
             HorizontalPager(
                 pageCount = list.size,
