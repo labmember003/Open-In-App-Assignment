@@ -1,10 +1,12 @@
 package com.falcon.openinapp_assignment.di
 
 import com.falcon.openinapp_assignment.api.ApiService
+import com.falcon.openinapp_assignment.api.AuthInterceptor
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
@@ -14,17 +16,24 @@ import javax.inject.Singleton
 class NetworkModule {
     @Singleton
     @Provides
-    fun providesRetrofit(): Retrofit {
+    fun providesRetrofitBuilder(okHttpClient: OkHttpClient): Retrofit.Builder {
         return Retrofit.Builder()
             .addConverterFactory(GsonConverterFactory.create())
+            .client(okHttpClient)
             .baseUrl("https://api.inopenapp.com/api/v1/")
-            .build()
     }
-
     @Singleton
     @Provides
-    fun providesAPI(retrofit: Retrofit): ApiService {
-        return retrofit.create(ApiService::class.java)
+    fun provideHttpClient(authInterceptor: AuthInterceptor): OkHttpClient {
+        return OkHttpClient.Builder().addInterceptor(authInterceptor).build()
+    }
+    @Singleton
+    @Provides
+    fun providesAPI(retrofitBuilder: Retrofit.Builder, okHttpClient: OkHttpClient): ApiService {
+        return retrofitBuilder
+            .client(okHttpClient)
+            .build()
+            .create(ApiService::class.java)
     }
 
 }
