@@ -1,3 +1,5 @@
+package com.falcon.openinapp_assignment.api.dataclasses
+
 data class OverallUrlChart(
     val `2023-12-28`: Int,
     val `2023-12-29`: Int,

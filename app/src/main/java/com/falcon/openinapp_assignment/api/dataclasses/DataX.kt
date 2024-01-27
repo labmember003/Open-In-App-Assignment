@@ -1,3 +1,5 @@
+package com.falcon.openinapp_assignment.api.dataclasses
+
 data class DataX(
     val favourite_links: List<Any>,
     val overall_url_chart: OverallUrlChart,

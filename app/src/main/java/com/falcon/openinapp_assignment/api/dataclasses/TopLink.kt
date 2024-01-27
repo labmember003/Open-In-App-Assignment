@@ -1,3 +1,5 @@
+package com.falcon.openinapp_assignment.api.dataclasses
+
 data class TopLink(
     val app: String,
     val created_at: String,

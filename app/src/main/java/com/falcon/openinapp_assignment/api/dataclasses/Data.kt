@@ -1,3 +1,5 @@
+package com.falcon.openinapp_assignment.api.dataclasses
+
 data class Data(
     val applied_campaign: Int? = null,
     val `data`: DataX? = null,

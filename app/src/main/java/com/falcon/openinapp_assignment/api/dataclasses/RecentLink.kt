@@ -1,3 +1,5 @@
+package com.falcon.openinapp_assignment.api.dataclasses
+
 data class RecentLink(
     val app: String,
     val created_at: String,

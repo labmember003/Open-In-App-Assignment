@@ -1,6 +1,6 @@
 package com.falcon.openinapp_assignment.api
 
-import Data
+import com.falcon.openinapp_assignment.api.dataclasses.Data
 import retrofit2.http.GET
 
 interface ApiService {
