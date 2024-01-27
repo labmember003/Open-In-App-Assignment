@@ -1,4 +1,4 @@
-data class RawData(
+data class Data(
     val applied_campaign: Int,
     val `data`: DataX,
     val extra_income: Double,
