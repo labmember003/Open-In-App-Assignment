@@ -84,6 +84,7 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.falcon.openinapp_assignment.api.DataViewModel
 import com.falcon.openinapp_assignment.api.NetworkResult
+import com.falcon.openinapp_assignment.api.dataclasses.RecentLink
 import com.falcon.openinapp_assignment.api.dataclasses.TopLink
 import com.falcon.openinapp_assignment.utils.TokenManager
 import dagger.hilt.android.AndroidEntryPoint
@@ -307,14 +308,32 @@ class MainActivity : ComponentActivity() {
                 val topLink = remember {
                     mutableStateOf(true)
                 }
+                val activeBackgroundColor = colorResource(id = R.color.icon_blue)
+                val nonActiveBackgroundColor = colorResource(id = R.color.white)
+
+                val activeTextColor = colorResource(id = R.color.white)
+                val nonActiveTextColor = colorResource(id = R.color.dark_grey)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
                     Row {
-                        TopLinksCard(topLink)
-                        RecentLinksCard(topLink)
+                        val backgroundColorTopLink = remember {
+                            mutableStateOf(R.color.icon_blue)
+                        }
+                        val contentColorTopLink = remember {
+                            mutableStateOf(R.color.white)
+                        }
+
+                        val backgroundColorRecentLinks = remember {
+                            mutableStateOf(R.color.white)
+                        }
+                        val contentColorRecentLinks = remember {
+                            mutableStateOf(R.color.dark_grey)
+                        }
+                        TopLinksCard(topLink, backgroundColorTopLink, contentColorTopLink, backgroundColorRecentLinks, contentColorRecentLinks)
+                        RecentLinksCard(topLink, backgroundColorRecentLinks, contentColorRecentLinks, backgroundColorTopLink, contentColorTopLink)
                     }
                     Image(
                         painter = painterResource(R.drawable.input_container),
@@ -325,6 +344,11 @@ class MainActivity : ComponentActivity() {
                 }
                 if (topLink.value) {
                     val list = data?.data!!.top_links
+                    list.forEach { it ->
+                        LinkCard(it)
+                    }
+                } else {
+                    val list = data?.data!!.recent_links
                     list.forEach { it ->
                         LinkCard(it)
                     }
@@ -378,14 +402,29 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+
+
     @Composable
-    private fun RecentLinksCard(topLink: MutableState<Boolean>) {
+    private fun RecentLinksCard(
+        topLink: MutableState<Boolean>,
+        backgroundColorRecentLinks: MutableState<Int>,
+        contentColorRecentLinks: MutableState<Int>,
+        backgroundColorTopLink: MutableState<Int>,
+        contentColorTopLink: MutableState<Int>
+    ) {
         androidx.compose.material.Card(
             shape = RoundedCornerShape(32.dp),
             modifier = Modifier
                 .shadow(elevation = 0.dp, shape = RoundedCornerShape(8.dp))
-                .padding(8.dp),
-            backgroundColor = colorResource(id = R.color.white),
+                .padding(8.dp)
+                .clickable {
+                    topLink.value = false
+                    backgroundColorRecentLinks.value = R.color.icon_blue
+                    contentColorRecentLinks.value = R.color.white
+                    backgroundColorTopLink.value = R.color.white
+                    contentColorTopLink.value = R.color.dark_grey
+                },
+            backgroundColor = colorResource(id = backgroundColorRecentLinks.value),
         ) {
             Row(
                 modifier = Modifier
@@ -394,7 +433,7 @@ class MainActivity : ComponentActivity() {
                 Text(
                     text = "Recent Links",
                     fontSize = 12.sp,
-                    color = colorResource(id = R.color.dark_grey),
+                    color = colorResource(id = contentColorRecentLinks.value),
                     fontFamily = FontFamily(Font(R.font.nunito_extralight)),
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontWeight = FontWeight.SemiBold
@@ -405,13 +444,27 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun TopLinksCard(topLink: MutableState<Boolean>) {
+    private fun TopLinksCard(
+        topLink: MutableState<Boolean>,
+        backgroundColorTopLink: MutableState<Int>,
+        contentColorTopLink: MutableState<Int>,
+        backgroundColorRecentLinks: MutableState<Int>,
+        contentColorRecentLinks: MutableState<Int>
+    ) {
+
         androidx.compose.material.Card(
             shape = RoundedCornerShape(32.dp),
             modifier = Modifier
                 .shadow(elevation = 0.dp, shape = RoundedCornerShape(8.dp))
-                .padding(8.dp),
-            backgroundColor = colorResource(id = R.color.icon_blue),
+                .padding(8.dp)
+                .clickable {
+                    topLink.value = true
+                    backgroundColorTopLink.value = R.color.icon_blue
+                    contentColorTopLink.value = R.color.white
+                    backgroundColorRecentLinks.value = R.color.white
+                    contentColorRecentLinks.value = R.color.dark_grey
+                },
+            backgroundColor = colorResource(id = backgroundColorTopLink.value),
         ) {
             Row(
                 modifier = Modifier
@@ -420,7 +473,7 @@ class MainActivity : ComponentActivity() {
                 Text(
                     text = "Top Links",
                     fontSize = 12.sp,
-                    color = Color.White,
+                    color = colorResource(id = contentColorTopLink.value),
                     fontFamily = FontFamily(Font(R.font.nunito_extralight)),
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontWeight = FontWeight.SemiBold
@@ -465,7 +518,71 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-
+    @Composable
+    fun LinkCard(linkData: RecentLink) {
+        androidx.compose.material.Card(
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier
+                .shadow(elevation = 0.dp, shape = RoundedCornerShape(16.dp))
+                .padding(8.dp)
+                .fillMaxWidth(),
+            backgroundColor = Color.White,
+        ) {
+            Column(
+                verticalArrangement = Arrangement.Center
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth()
+                ) {
+                    ImageNameDate(linkData)
+                    ClicksColumn(linkData)
+                }
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxWidth()
+                ) {
+                    val clipboardManager =
+                        LocalContext.current.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    val link = remember {
+                        mutableStateOf(linkData.web_link)
+                    }
+                    Text(
+                        text = link.value,
+                        fontSize = 14.sp,
+                        color = colorResource(id = R.color.icon_blue),
+                        fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        modifier = Modifier
+                            .weight(0.9f)
+                    )
+                    Image(
+                        painter = painterResource(R.drawable.copy),
+                        contentDescription = "Icon",
+                        modifier = Modifier
+                            .weight(0.1f)
+                            .size(20.dp)
+                            .clickable {
+                                clipboardManager.setPrimaryClip(
+                                    ClipData.newPlainText(
+                                        "Copied Code",
+                                        link.value
+                                    )
+                                )
+                            }
+                    )
+                }
+            }
+        }
+    }
     @Composable
     fun LinkCard(linkData: TopLink) {
         androidx.compose.material.Card(
@@ -559,7 +676,68 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
+    private fun ClicksColumn(linkData: RecentLink) {
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.End
+        ) {
+            Text(
+                text = linkData.total_clicks.toString(),
+                fontSize = 14.sp,
+                fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold
+                )
+            )
+            Text(
+                text = "Clicks",
+                fontSize = 14.sp,
+                color = colorResource(id = R.color.dark_grey),
+                fontFamily = FontFamily(Font(R.font.nunito_light_1)),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold
+                )
+            )
+        }
+    }
+
+    @Composable
     private fun ImageNameDate(linkData: TopLink) {
+        Row {
+            Image(
+                painter = painterResource(R.drawable.hello),
+                contentDescription = "Icon",
+                modifier = Modifier
+                    .size(35.dp)
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.Start
+            ) {
+                Text(
+                    text = linkData.app,
+                    fontSize = 14.sp,
+                    fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.SemiBold
+                    )
+                )
+                Text(
+                    text = linkData.created_at,
+                    fontSize = 14.sp,
+                    color = colorResource(id = R.color.dark_grey),
+                    fontFamily = FontFamily(Font(R.font.nunito_light_1)),
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontWeight = FontWeight.SemiBold
+                    )
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun ImageNameDate(linkData: RecentLink) {
         Row {
             Image(
                 painter = painterResource(R.drawable.hello),
@@ -681,6 +859,7 @@ class MainActivity : ComponentActivity() {
 
     @Composable
     private fun Chart() {
+        val data = data?.data?.overall_url_chart.apply {}
         val steps = 5
         val pointsData: List<Point> =
             listOf(Point(0f, 40f), Point(1f, 90f), Point(2f, 0f), Point(3f, 60f), Point(4f, 10f))
@@ -748,7 +927,7 @@ class MainActivity : ComponentActivity() {
                     .padding(8.dp),
             ) {
                 Text(
-                    text = "22 Aug - 23 Sept",
+                    text = "28 Dec - 27 Jan",
                     fontSize = 12.sp,
                     fontFamily = FontFamily(Font(R.font.nunito_extralight)),
                     style = MaterialTheme.typography.bodyLarge.copy(
