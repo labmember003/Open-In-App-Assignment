@@ -108,8 +108,8 @@ dependencies {
     implementation ("com.google.firebase:firebase-firestore-ktx:24.7.0")
     implementation ("com.google.firebase:firebase-auth-ktx:22.1.0")
 
-    implementation("com.google.dagger:hilt-android:2.44")
-    kapt("com.google.dagger:hilt-android-compiler:2.44")
+    implementation("com.google.dagger:hilt-android:2.48")
+    kapt("com.google.dagger:hilt-android-compiler:2.48")
     implementation ("com.itextpdf:itextg:5.5.10") // Use the version appropriate for your project
     implementation ("com.madgag.spongycastle:prov:1.56.0.0") // Use the version appropriate for your project
     implementation("androidx.core:core-splashscreen:1.0.1")
