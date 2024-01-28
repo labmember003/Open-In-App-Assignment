@@ -344,11 +344,13 @@ class MainActivity : ComponentActivity() {
                 }
                 if (topLink.value) {
                     val list = data?.data!!.top_links
+//                    CANT USE LAZY COLUMN HERE BECAUSE WE ARE ALREADY IN A COLUMN SCOPE
                     list.forEach { it ->
                         LinkCard(it)
                     }
                 } else {
                     val list = data?.data!!.recent_links
+                    //                    CANT USE LAZY COLUMN HERE BECAUSE WE ARE ALREADY IN A COLUMN SCOPE
                     list.forEach { it ->
                         LinkCard(it)
                     }
